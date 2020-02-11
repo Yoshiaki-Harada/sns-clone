@@ -8,10 +8,7 @@ import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.put
-import io.ktor.routing.routing
+import io.ktor.routing.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -42,7 +39,7 @@ fun Application.module(testing: Boolean = false) {
             val id = call.parameters["id"]!!.toInt() //パスパラメータを受け取る
             val name = call.request.queryParameters["name"]!! //クエリパラメータを受け取る
             // 指定したidが存在しなければ404 not foundを返す
-            if (students.find { it.id == id } == null){
+            if (students.find { it.id == id } == null) {
                 call.respond(HttpStatusCode.NotFound, "$id is not found")
                 return@put
             }
@@ -50,6 +47,15 @@ fun Application.module(testing: Boolean = false) {
             students.removeIf { it.id == id }
             students.add(Student(id, name))
             call.respond("$id is updated")
+        }
+
+        delete("students/{id}") {
+            val id = call.parameters["id"]!!.toInt() //パスパラメータを受け取る
+            if (students.removeIf { it.id == id }) {
+                call.respond("$id is deleted")
+                return@delete
+            }
+            call.respond(HttpStatusCode.NotFound, "$id is not found")
         }
     }
 }
