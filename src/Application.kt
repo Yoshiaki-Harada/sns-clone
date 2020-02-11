@@ -36,21 +36,18 @@ fun Application.module(testing: Boolean = false) {
         }
 
         put("students/{id}") {
-            val id = call.parameters["id"]!!.toInt() //パスパラメータを受け取る
-            val name = call.request.queryParameters["name"]!! //クエリパラメータを受け取る
-            // 指定したidが存在しなければ404 not foundを返す
-            if (students.find { it.id == id } == null) {
-                call.respond(HttpStatusCode.NotFound, "$id is not found")
+            val id = call.parameters["id"]!!.toInt()
+            val name = call.request.queryParameters["name"]!!
+            if (students.removeIf { it.id == id }) {
+                students.add(Student(id, name))
+                call.respond("$id is updated")
                 return@put
             }
-            // 古いデータを削除して新しく作成する
-            students.removeIf { it.id == id }
-            students.add(Student(id, name))
-            call.respond("$id is updated")
+            call.respond(HttpStatusCode.NotFound, "$id is not found")
         }
 
         delete("students/{id}") {
-            val id = call.parameters["id"]!!.toInt() //パスパラメータを受け取る
+            val id = call.parameters["id"]!!.toInt()
             if (students.removeIf { it.id == id }) {
                 call.respond("$id is deleted")
                 return@delete
