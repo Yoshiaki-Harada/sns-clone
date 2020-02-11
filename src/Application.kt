@@ -5,6 +5,7 @@ import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.get
@@ -35,6 +36,20 @@ fun Application.module(testing: Boolean = false) {
             val inputJson = call.receive<Student>()
             students.add(inputJson)
             call.respond(inputJson.id)
+        }
+
+        put("students/{id}") {
+            val id = call.parameters["id"]!!.toInt() //パスパラメータを受け取る
+            val name = call.request.queryParameters["name"]!! //クエリパラメータを受け取る
+            // 指定したidが存在しなければ404 not foundを返す
+            if (students.find { it.id == id } == null){
+                call.respond(HttpStatusCode.NotFound, "$id is not found")
+                return@put
+            }
+            // 古いデータを削除して新しく作成する
+            students.removeIf { it.id == id }
+            students.add(Student(id, name))
+            call.respond("$id is updated")
         }
     }
 }
