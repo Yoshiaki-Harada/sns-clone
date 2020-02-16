@@ -16,6 +16,8 @@ val students = mutableListOf(Student(1, "Taro"), Student(2, "Hanako"), Student(3
 
 data class Student(val id: Int, val name: String)
 
+data class JsonResponse(val message: String)
+
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
@@ -32,7 +34,7 @@ fun Application.module(testing: Boolean = false) {
         post("/students") {
             val inputJson = call.receive<Student>()
             students.add(inputJson)
-            call.respond(inputJson.id)
+            call.respond(JsonResponse("id ${inputJson.id} is created"))
         }
 
         put("students/{id}") {
@@ -40,19 +42,19 @@ fun Application.module(testing: Boolean = false) {
             val name = call.request.queryParameters["name"]!!
             if (students.removeIf { it.id == id }) {
                 students.add(Student(id, name))
-                call.respond("$id is updated")
+                call.respond(JsonResponse("id $id is updated"))
                 return@put
             }
-            call.respond(HttpStatusCode.NotFound, "$id is not found")
+            call.respond(HttpStatusCode.NotFound, JsonResponse("id $id is not found"))
         }
 
         delete("students/{id}") {
             val id = call.parameters["id"]!!.toInt()
             if (students.removeIf { it.id == id }) {
-                call.respond("$id is deleted")
+                call.respond(JsonResponse("id $id is deleted"))
                 return@delete
             }
-            call.respond(HttpStatusCode.NotFound, "$id is not found")
+            call.respond(HttpStatusCode.NotFound, JsonResponse("id$id is not found"))
         }
     }
 }
