@@ -11,17 +11,18 @@ class AddRetrieve(private val kodein: Kodein) : Calc {
         return d1 + d2
     }
 
-    override fun calc(d: Double): Double {
+    override fun calcDefault(d: Double): Double {
         return default + d
     }
 }
+
 val kodeinRetrieve = Kodein {
     bind<Calc>() with provider { AddRetrieve(kodein) }
     bind<Double>() with provider { 10.0 }
 }
+
 fun main() {
     val add: Calc by kodeinRetrieve.instance<Calc>()
-
-    val addDefault by kodeinInjection.instance<Calc>()
-    print("result ${add.calc(1.0)}")
+    println("result ${add.calc(1.0, 2.0)}")
+    println("result ${add.calcDefault(1.0)}")
 }
