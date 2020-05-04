@@ -1,14 +1,17 @@
 package com.example
 
-import io.requery.Persistable
-import io.requery.kotlin.EntityStore
 import io.requery.kotlin.eq
 
 
 class StudentDao {
 
-    fun findAll(dataStore: EntityStore<Persistable, Any>): List<Student> =
+    fun findAll(dataStore: Store): List<Student> =
         dataStore.select(Student::class).get().toList()
+
+    fun findById(id: Int, dataStore: Store): Student? {
+        val cond = Student::id eq id
+        return dataStore.select(Student::class).where(cond).get().firstOrNull()
+    }
 
     fun create(student: Student, dataStore: Store) {
         dataStore.insert(student)
@@ -19,6 +22,7 @@ class StudentDao {
     }
 
     fun delete(id: Int, dataStore: Store) {
-        dataStore.delete(Student::class).where(Student::id eq id).get().value()
+        val cond = Student::id eq id
+        dataStore.delete(Student::class).where(cond).get().value()
     }
 }
