@@ -1,6 +1,5 @@
 package com.example
 
-import com.mysql.cj.jdbc.MysqlDataSource
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -10,28 +9,16 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
-import io.requery.Persistable
-import io.requery.sql.KotlinConfiguration
-import io.requery.sql.KotlinEntityDataStore
+import org.kodein.di.generic.instance
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
-
-val students = mutableListOf(Student(1, "Taro"), Student(2, "Hanako"), Student(3, "Yuta"))
-val dataSource = MysqlDataSource().apply {
-    serverName = "127.0.0.1"
-    port = 3306
-    user = "root"
-    password = "mysql"
-    databaseName = "school"
-}
-val dataStore = KotlinEntityDataStore<Persistable>(KotlinConfiguration(dataSource = dataSource, model = Models.DEFAULT))
 
 data class JsonResponse(val message: String)
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
-    val dao = StudentDao()
+    val usecase by Injector.kodein.instance<StudentUsecase>()
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
@@ -39,46 +26,38 @@ fun Application.module(testing: Boolean = false) {
     }
     routing {
         get("/students") {
-            call.respond(dao.findAll(dataStore))
+            call.respond(usecase.getStudents())
         }
 
         post("/students") {
             val inputJson = call.receive<Student>()
-            students.add(inputJson)
-            dataStore.withTransaction {
-                dao.create(inputJson, this)
-            }
+            usecase.createStudent(inputJson)
             call.respond(JsonResponse("id ${inputJson.id} is created"))
         }
 
         put("students/{id}") {
             val id = call.parameters["id"]!!.toInt()
             val name = call.request.queryParameters["name"]!!
-            val students = dao.findAll(dataStore)
+            val students = usecase.getStudents()
 
             if (students.indexOfFirst { it.id == id } < 0) {
                 call.respond(HttpStatusCode.NotFound, JsonResponse("id $id is not found"))
                 return@put
             }
-
-            dataStore.withTransaction {
-                dao.update(Student(id, name), this)
-            }
+            usecase.updateStudent(Student(id, name))
             call.respond(JsonResponse("id $id is updated"))
         }
 
         delete("students/{id}") {
             val id = call.parameters["id"]!!.toInt()
-            val students = dao.findAll(dataStore)
+            val students = usecase.getStudents()
 
             if (students.indexOfFirst { it.id == id } < 0) {
                 call.respond(HttpStatusCode.NotFound, JsonResponse("id $id is not found"))
                 return@delete
             }
 
-            dataStore.withTransaction {
-                dao.delete(id, this)
-            }
+            usecase.deleteStudent(id)
             call.respond(JsonResponse("id $id is deleted"))
         }
     }

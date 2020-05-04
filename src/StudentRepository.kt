@@ -10,14 +10,20 @@ class StudentRepository(private val dataStore: KotlinEntityDataStore<Persistable
     override fun findAll(): List<Student> = dao.findAll(this.dataStore)
 
     override fun create(student: Student) {
-        dao.create(student, dataStore)
+        dataStore.withTransaction {
+            dao.create(student, this)
+        }
     }
 
     override fun update(student: Student) {
-        dao.update(student, dataStore)
+        dataStore.withTransaction {
+            dao.update(student, this)
+        }
     }
 
     override fun delete(id: Int) {
-        return dao.delete(id, dataStore)
+        dataStore.withTransaction {
+             dao.delete(id, this)
+        }
     }
 }
