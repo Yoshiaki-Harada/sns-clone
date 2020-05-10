@@ -21,8 +21,8 @@ class StudentDao {
         dataStore.update(student)
     }
 
-    fun delete(id: Int, dataStore: Store) {
+    fun delete(id: Int, dataStore: Store): Int {
         val cond = Student::id eq id
-        dataStore.delete(Student::class).where(cond).get().value()
+        return dataStore.delete(Student::class).where(cond).get().value()
     }
 }
