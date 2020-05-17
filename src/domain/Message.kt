@@ -8,6 +8,7 @@ class Message(
     val userId: UserId,
     val text: MessageText,
     val tags: Tags,
+    val comments: Comments,
     val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime
 ) {

@@ -7,7 +7,15 @@ import java.sql.Connection
 import java.util.*
 
 class MessageDao {
-    fun findById(id: UUID) = MessageEntity.findById(id)
+    fun find() = transaction(
+        transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
+        repetitionAttempts = 2
+    ) { MessageEntity.all().toList() }
+
+    fun findById(id: UUID) = transaction(
+        transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
+        repetitionAttempts = 2
+    ) { MessageEntity.findById(id) }
 
     fun findByUserId(userId: UUID): List<MessageEntity> =
         transaction(
@@ -16,5 +24,4 @@ class MessageDao {
         ) {
             MessageEntity.find { Messages.userId eq userId }.toList()
         }
-
 }

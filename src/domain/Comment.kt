@@ -6,6 +6,7 @@ import java.util.*
 class Comment(
     val id: CommentId,
     val commentText: CommentText,
+    val userId: UserId,
     val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime
 ){

@@ -1,8 +1,7 @@
 package com.example.usecase
 
-import com.example.domain.User
-import com.example.domain.UserId
+import com.example.domain.*
 
 interface UserUsecase {
-    fun get(id :UserId) :User
+    fun get(id: UserId): User
 }

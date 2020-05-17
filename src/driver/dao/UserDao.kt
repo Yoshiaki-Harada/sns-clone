@@ -6,6 +6,11 @@ import java.sql.Connection
 import java.util.*
 
 class UserDao {
+    fun find() = transaction(
+        transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
+        repetitionAttempts = 2
+    ) { UserEntity.all().toList() }
+
     fun findById(id: UUID): UserEntity? = transaction(
         transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
         repetitionAttempts = 2

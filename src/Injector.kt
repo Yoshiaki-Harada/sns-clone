@@ -4,8 +4,12 @@ import com.example.driver.dao.CommentDao
 import com.example.driver.dao.MessageDao
 import com.example.driver.dao.TagDao
 import com.example.driver.dao.UserDao
+import com.example.gateway.MessageRepository
+import com.example.gateway.MessagePort
 import com.example.gateway.UserPort
 import com.example.gateway.UserRepository
+import com.example.usecase.MessageUsecase
+import com.example.usecase.MessageUsecaseImpl
 import com.example.usecase.UserUsecase
 import com.example.usecase.UserUsecaseImpl
 import org.jetbrains.exposed.sql.Database
@@ -18,10 +22,12 @@ import org.postgresql.ds.PGSimpleDataSource
 object Injector {
     val usecaseModule = Kodein.Module("usecase") {
         bind<UserUsecase>() with singleton { UserUsecaseImpl(instance()) }
+        bind<MessageUsecase>() with singleton { MessageUsecaseImpl(instance()) }
     }
 
     val portModule = Kodein.Module("port") {
-        bind<UserPort>() with singleton { UserRepository(instance(), instance(), instance(), instance()) }
+        bind<UserPort>() with singleton { UserRepository(instance(), instance()) }
+        bind<MessagePort>() with singleton { MessageRepository(instance(), instance(), instance()) }
     }
 
     val daoModule = Kodein.Module("dao") {

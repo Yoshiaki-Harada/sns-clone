@@ -1,5 +1,6 @@
 package com.example.gateway
 
+import com.example.domain.Messages
 import com.example.domain.User
 import com.example.domain.UserId
 

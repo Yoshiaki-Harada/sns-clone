@@ -1,5 +1,8 @@
 package driver.entity
 
+import com.example.domain.*
+import com.example.domain.Comments
+import com.example.zoneId
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -22,4 +25,15 @@ class MessageEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var text by Messages.text
     var createdAt by Messages.createdAt
     var updatedAt by Messages.updatedAt
+
+    fun toDomain(comments: Comments) =
+        Message(
+            id = MessageId(id.value),
+            userId = UserId(userId.value),
+            text = MessageText(text),
+            tags = Tags(emptyList()),
+            comments = comments,
+            createdAt = createdAt.atZone(zoneId),
+            updatedAt = updatedAt.atZone(zoneId)
+        )
 }
