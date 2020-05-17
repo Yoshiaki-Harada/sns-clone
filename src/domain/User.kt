@@ -3,7 +3,7 @@ package com.example.domain
 import java.util.*
 
 class User(
-    val id: UserId,
+    val id: UserId ,
     val name: UserName,
     val mail: Mail
 ) {

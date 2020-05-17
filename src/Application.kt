@@ -15,7 +15,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.locations.Location
 import io.ktor.locations.Locations
 import io.ktor.locations.get
+import io.ktor.locations.put
+import io.ktor.request.receive
 import io.ktor.response.respond
+import io.ktor.routing.post
 import io.ktor.routing.routing
 import org.kodein.di.generic.instance
 import java.time.ZonedDateTime
@@ -51,6 +54,10 @@ data class ResponseMessage(
 data class ResponseMessages(val messages: List<ResponseMessage>)
 
 data class ResponseTag(val id: UUID, val name: String)
+data class ResponseId(val id: UUID)
+data class CreateUser(val name: String, val mail: String)
+data class RequestMessage(val text: String,val tags: List<RequestTag>)
+data class RequestTag(val name: String)
 class ValidationError(override val message: String) : Throwable(message)
 
 @Suppress("unused") // Referenced in application.conf
@@ -86,12 +93,34 @@ fun Application.module(testing: Boolean = false) {
     }
 
     routing {
+        post("/users") {
+            val user = call.receive<CreateUser>()
+            val id = userUsecase.create(
+                User(
+                    id = UserId(UUID.randomUUID()),
+                    name = UserName(user.name),
+                    mail = Mail(user.mail)
+                )
+            )
+            call.respond(ResponseId(id.value))
+        }
+
         @Location("/users/{userId}")
-        data class UserLocation(val userId: String)
-        get<UserLocation> { params ->
+        data class GetUserLocation(val userId: String)
+        get<GetUserLocation> { params ->
             val id = getId(params.userId)
             call.respond(userUsecase.get(UserId(id)).toResponse())
         }
+
+        @Location("/users/{userId}")
+        data class UpdateUserLocation(val userId: String)
+        put<UpdateUserLocation> { params ->
+            val id = getId(params.userId)
+            val user = call.receive<CreateUser>()
+            userUsecase.update(User(id = UserId(id), name = UserName(user.name), mail = Mail(user.mail)))
+            call.respond(JsonResponse("Ok"))
+        }
+
         @Location("/messages")
         data class MessagesLocation(val order: String = "desc", val by: String = "createdAt")
         get<MessagesLocation> { params ->
@@ -110,6 +139,9 @@ fun Application.module(testing: Boolean = false) {
                 ResponseMessages(it)
             }
             call.respond(messages)
+        }
+        post("/messages") {
+           val message = call.receive<RequestMessage>()
         }
     }
 }
