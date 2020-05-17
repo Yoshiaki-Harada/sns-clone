@@ -1,22 +1,24 @@
 package driver.entity
 
-import io.requery.*
-import org.kodein.di.generic.M
-import org.kodein.di.softReference
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.`java-time`.datetime
 import java.util.*
 
-@Entity
-@Table(name = "comments")
-data class CommentEntity(
-    @get:Key
-    var id: UUID,
-    @get:ForeignKey(references = UsersEntity::class)
-    @get:Column(name = "user_id")
-    var userId: UUID,
-    @get:ForeignKey(references = MessageEntity::class)
-    @get:Column(name = "message_id")
-    var messageId: UUID,
-    var text: String,
-    var createdAt: java.sql.Timestamp,
-    var updatedAt: java.sql.Timestamp
-) : Persistable
+object Comments : UUIDTable() {
+    val userId = reference("user_id", Users)
+    val text = varchar("text", 100)
+    val createdAt = datetime("created_at")
+    val updatedAt = datetime("updated_at")
+}
+
+class CommentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<CommentEntity>(Comments)
+
+    var userId by Comments.userId
+    var text by Comments.text
+    var createdAt by Comments.createdAt
+    var updatedAt by Comments.updatedAt
+}

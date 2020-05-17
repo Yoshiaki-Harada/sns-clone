@@ -1,5 +1,5 @@
 package com.example.domain
 
-class Comments {
+class Comments(val list: List<Comment>) {
 
 }

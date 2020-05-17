@@ -1,20 +1,25 @@
 package driver.entity
 
-import io.requery.*
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.`java-time`.datetime
 import java.util.*
 
 
-@Entity
-@Table(name = "messages")
-data class MessageEntity (
-    @get:Key
-    var id: UUID,
-    @get:ForeignKey(references = UsersEntity::class)
-    @get:Column(name = "user_id")
-    var userId: UUID,
-    var text: String,
-    var createdAt: java.sql.Timestamp,
-    var updatedAt: java.sql.Timestamp
-): Persistable
+object Messages : UUIDTable() {
+    val userId = reference("user_id", Users)
+    val text = varchar("text", 100)
+    val createdAt = datetime("created_at")
+    val updatedAt = datetime("updated_at")
+}
 
+class MessageEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<MessageEntity>(Messages)
 
+    var userId by Messages.userId
+    var text by Messages.text
+    var createdAt by Messages.createdAt
+    var updatedAt by Messages.updatedAt
+}
