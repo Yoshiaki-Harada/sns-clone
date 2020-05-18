@@ -4,6 +4,9 @@ import com.example.domain.*
 import com.example.gateway.UserNotFoundException
 import com.example.usecase.MessageUsecase
 import com.example.usecase.UserUsecase
+import com.example.valueobject.CreatedMessage
+import com.example.valueobject.CreatedTag
+import com.example.valueobject.CreatedTags
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -18,6 +21,7 @@ import io.ktor.locations.get
 import io.ktor.locations.put
 import io.ktor.request.receive
 import io.ktor.response.respond
+import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import org.kodein.di.generic.instance
@@ -56,7 +60,12 @@ data class ResponseMessages(val messages: List<ResponseMessage>)
 data class ResponseTag(val id: UUID, val name: String)
 data class ResponseId(val id: UUID)
 data class CreateUser(val name: String, val mail: String)
-data class RequestMessage(val text: String,val tags: List<RequestTag>)
+data class RequestMessage(
+    val text: String,
+    val tags: List<RequestTag>,
+    val userId: String
+)
+
 data class RequestTag(val name: String)
 class ValidationError(override val message: String) : Throwable(message)
 
@@ -93,6 +102,9 @@ fun Application.module(testing: Boolean = false) {
     }
 
     routing {
+        get("/users") {
+            call.respond(userUsecase.get().list.map(User::toResponse))
+        }
         post("/users") {
             val user = call.receive<CreateUser>()
             val id = userUsecase.create(
@@ -141,7 +153,29 @@ fun Application.module(testing: Boolean = false) {
             call.respond(messages)
         }
         post("/messages") {
-           val message = call.receive<RequestMessage>()
+            val message = call.receive<RequestMessage>()
+            val id = messageUsecase.create(
+                CreatedMessage(
+                    userId = UserId(getId(message.userId)),
+                    text = MessageText(message.text),
+                    tags = CreatedTags(message.tags.map { CreatedTag(it.name) })
+                )
+            )
+
+            call.respond(ResponseId(id.value))
+        }
+        @Location("/messages/{messageId}")
+        data class UpdateMessageLocation(val messageId: String)
+        put<UpdateMessageLocation> { params ->
+            val message = call.receive<RequestMessage>()
+            messageUsecase.updated(
+                MessageId(getId(params.messageId)), CreatedMessage(
+                    userId = UserId(getId(message.userId)),
+                    text = MessageText(message.text),
+                    tags = CreatedTags(message.tags.map { CreatedTag(it.name) })
+                )
+            )
+            call.respond(JsonResponse("Ok"))
         }
     }
 }

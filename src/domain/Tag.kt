@@ -2,8 +2,7 @@ package com.example.domain
 
 import java.util.*
 
-class Tag(val id : TagId, val name: TagName) {
-}
+class Tag(val id : TagId, val name: TagName)
 
 class TagName(val value: String)
 

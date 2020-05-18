@@ -1,11 +1,7 @@
 package com.example
 
-import com.example.driver.dao.CommentDao
-import com.example.driver.dao.MessageDao
-import com.example.driver.dao.TagDao
-import com.example.driver.dao.UserDao
-import com.example.gateway.MessageRepository
 import com.example.gateway.MessagePort
+import com.example.gateway.MessageRepository
 import com.example.gateway.UserPort
 import com.example.gateway.UserRepository
 import com.example.usecase.MessageUsecase
@@ -21,20 +17,13 @@ import org.postgresql.ds.PGSimpleDataSource
 
 object Injector {
     val usecaseModule = Kodein.Module("usecase") {
+        bind<MessageUsecase>() with singleton { MessageUsecaseImpl(instance(), instance()) }
         bind<UserUsecase>() with singleton { UserUsecaseImpl(instance()) }
-        bind<MessageUsecase>() with singleton { MessageUsecaseImpl(instance()) }
     }
 
     val portModule = Kodein.Module("port") {
-        bind<UserPort>() with singleton { UserRepository(instance(), instance()) }
-        bind<MessagePort>() with singleton { MessageRepository(instance(), instance(), instance()) }
-    }
-
-    val daoModule = Kodein.Module("dao") {
-        bind<UserDao>() with singleton { UserDao() }
-        bind<MessageDao>() with singleton { MessageDao() }
-        bind<CommentDao>() with singleton { CommentDao() }
-        bind<TagDao>() with singleton { TagDao() }
+        bind<UserPort>() with singleton { UserRepository(instance()) }
+        bind<MessagePort>() with singleton { MessageRepository(instance()) }
     }
 
     // ExposedのDatabase接続定義
@@ -49,6 +38,6 @@ object Injector {
     }
 
     public val kodein = Kodein {
-        importAll(usecaseModule, portModule, daoModule, dataSourceModule)
+        importAll(usecaseModule, portModule, dataSourceModule)
     }
 }
