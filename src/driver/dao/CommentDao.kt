@@ -4,6 +4,7 @@ import com.example.domain.Comment
 import com.example.domain.CommentId
 import com.example.domain.CommentText
 import com.example.domain.UserId
+import com.example.driver.entity.CommentEntity
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -11,6 +12,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.`java-time`.datetime
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
@@ -18,8 +20,8 @@ object Comments : UUIDTable() {
     val userId = reference("user_id", Users)
     val text = varchar("text", 100)
     val messageId = reference("message_id", Messages)
-    val createdAt = datetime("created_at")
-    val updatedAt = datetime("updated_at")
+    val createdAt = datetime("created_at").default(LocalDateTime.now())
+    val updatedAt = datetime("updated_at").default(LocalDateTime.now())
 }
 
 class CommentDao(id: EntityID<UUID>) : UUIDEntity(id) {
@@ -57,6 +59,23 @@ class CommentDao(id: EntityID<UUID>) : UUIDEntity(id) {
             return messages.map { findByMessageId(it.id.value) }
         }
 
+        fun create(comment: CommentEntity): UUID {
+            return CommentDao.new(comment.id) {
+                messageId = EntityID(comment.messageId, Messages)
+                userId = EntityID(comment.userId, Users)
+                text = comment.text
+            }.id.value
+        }
+
+        fun update(comment: CommentEntity) {
+            val comment = findByCommentId(comment.id)
+            comment?.let {
+                it.messageId = comment.messageId
+                it.text = comment.text
+                it.userId = comment.userId
+                it.updatedAt = LocalDateTime.now()
+            }
+        }
     }
 
     var userId by Comments.userId

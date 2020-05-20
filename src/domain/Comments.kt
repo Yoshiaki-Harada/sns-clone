@@ -8,7 +8,7 @@ class Comments(val list: List<Comment>) {
         }
         By.CREATED_AT -> when (order) {
             Order.ASC -> list.sortedBy { it.createdAt }
-            Order.DESC -> list.sortedBy { it.createdAt }
+            Order.DESC -> list.sortedByDescending { it.createdAt }
         }
     }.let { Comments(it) }
 }

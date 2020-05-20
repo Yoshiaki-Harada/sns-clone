@@ -3,8 +3,10 @@ package com.example.gateway
 import com.example.domain.*
 import com.example.driver.dao.UserDao
 import com.example.driver.entity.UserEntity
+import com.example.valueobject.CreatedUser
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 class UserNotFoundException(id: UserId) : Throwable("user: ${id.value} not found")
 
@@ -29,17 +31,17 @@ class UserRepository(
 
     override fun isNotFound(id: UserId) = !isFound(id)
 
-    override fun create(user: User): UserId {
+    override fun create(user: CreatedUser): UserId {
         return transaction {
-            UserDao.create(UserEntity(user.id.value, user.name.value, user.mail.value))
+            UserDao.create(UserEntity(UUID.randomUUID(), user.name.value, user.mail.value))
         }.let { UserId(it) }
     }
 
 
-    override fun update(user: User) {
-        if (!isFound(user.id)) throw UserNotFoundException(user.id)
+    override fun update(userId: UserId, user: CreatedUser) {
+        if (!isFound(userId)) throw UserNotFoundException(userId)
         transaction {
-            UserDao.update(UserEntity(user.id.value, user.name.value, user.mail.value))
+            UserDao.update(UserEntity(userId.value, user.name.value, user.mail.value))
         }
     }
 }

@@ -21,12 +21,16 @@ enum class By(val value: String) {
 class Messages(val list: List<Message>) {
     fun sorted(by: By, order: Order): Messages = when (by) {
         By.UPDATED_AT -> when (order) {
-            Order.ASC -> list.sortedBy { it.updatedAt }
+            Order.ASC -> list.sortedBy {
+                it.updatedAt
+            }
             Order.DESC -> list.sortedByDescending { it.updatedAt }
         }
         By.CREATED_AT -> when (order) {
-            Order.ASC -> list.sortedBy { it.createdAt }
-            Order.DESC -> list.sortedBy { it.createdAt }
+            Order.ASC -> list.sortedBy {
+                it.createdAt
+            }
+            Order.DESC -> list.sortedByDescending { it.createdAt }
         }
     }.let { Messages(it) }
 

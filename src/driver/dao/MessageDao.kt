@@ -50,7 +50,7 @@ class MessageDao(id: EntityID<UUID>) : UUIDEntity(id) {
 
 
         fun update(message: MessageEntity) {
-            val user = MessageDao.findByMessageId(message.id)
+            val user = findByMessageId(message.id)
             user?.let {
                 it.text = message.text
                 it.userId = EntityID(message.userId, Users)
