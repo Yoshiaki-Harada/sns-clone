@@ -7,8 +7,10 @@ import com.example.gateway.UserNotFoundException
 import com.example.gateway.UserPort
 import com.example.valueobject.CreatedComment
 import com.example.valueobject.CreatedMessage
+import mu.KotlinLogging
 
 class MessageUsecaseImpl(private val messagePort: MessagePort, private val userPort: UserPort) : MessageUsecase {
+    val logger = KotlinLogging.logger {}
     override fun get(by: By, order: Order): Messages {
         return messagePort.getMessages().sorted(by, order).sortedComments(by, order)
     }
@@ -20,7 +22,8 @@ class MessageUsecaseImpl(private val messagePort: MessagePort, private val userP
     }
 
     override fun create(message: CreatedMessage): MessageId {
-        if (userPort.isFound(message.userId)) throw UserNotFoundException(message.userId)
+        logger.debug { "create message" }
+        if (userPort.isNotFound(message.userId)) throw UserNotFoundException(message.userId)
         return messagePort.createMessage(message)
     }
 

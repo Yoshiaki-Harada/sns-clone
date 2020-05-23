@@ -27,33 +27,15 @@ object Comments : UUIDTable() {
 class CommentDao(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<CommentDao>(Comments) {
 
-        fun find() = transaction(
-            transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
-            repetitionAttempts = 2
-        ) { all().toList() }
+        fun find() = all().toList()
 
-        fun findByCommentId(id: UUID) = transaction(
-            transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
-            repetitionAttempts = 2
-        ) {
-            CommentDao.findById(id)
-        }
+        fun findByCommentId(id: UUID) = CommentDao.findById(id)
 
         fun findByUserId(userId: UUID) =
-            transaction(
-                transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
-                repetitionAttempts = 2
-            ) {
-                find { Comments.userId eq userId }.toList()
-            }
+            find { Comments.userId eq userId }.toList()
 
         fun findByMessageId(messageId: UUID) =
-            transaction(
-                transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
-                repetitionAttempts = 2
-            ) {
-                find { Comments.messageId eq messageId }.toList()
-            }
+            find { Comments.messageId eq messageId }.toList()
 
         fun findByMessages(messages: List<MessageDao>): List<List<CommentDao>> {
             return messages.map { findByMessageId(it.id.value) }
@@ -83,13 +65,4 @@ class CommentDao(id: EntityID<UUID>) : UUIDEntity(id) {
     var text by Comments.text
     var createdAt by Comments.createdAt
     var updatedAt by Comments.updatedAt
-
-    private val zoneId = ZoneId.of("UTC")
-    fun toDomain() = Comment(
-        id = CommentId(id.value),
-        commentText = CommentText(text),
-        userId = UserId(userId.value),
-        createdAt = createdAt.atZone(zoneId),
-        updatedAt = updatedAt.atZone(zoneId)
-    )
 }

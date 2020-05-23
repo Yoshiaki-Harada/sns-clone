@@ -37,7 +37,7 @@ object Injector {
         }
     }
 
-    public val kodein = Kodein {
+    val kodein = Kodein {
         importAll(usecaseModule, portModule, dataSourceModule)
     }
 }

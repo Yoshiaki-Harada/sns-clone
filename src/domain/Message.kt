@@ -11,8 +11,7 @@ class Message(
     val comments: Comments,
     val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime
-) {
-}
+)
 
 class MessageText(val value: String)
 

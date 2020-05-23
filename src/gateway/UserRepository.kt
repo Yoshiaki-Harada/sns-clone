@@ -6,6 +6,7 @@ import com.example.driver.entity.UserEntity
 import com.example.valueobject.CreatedUser
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.Connection
 import java.util.*
 
 class UserNotFoundException(id: UserId) : Throwable("user: ${id.value} not found")
@@ -15,13 +16,22 @@ class UserRepository(
 ) :
     UserPort {
     override fun find() =
-        UserDao.find()
-            .map { User(id = UserId(it.id.value), name = UserName(it.name), mail = Mail(it.mail)) }
-            .let { Users(it) }
+        transaction(
+            transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
+            repetitionAttempts = 2
+        ) {
+            UserDao.find()
+                .map { User(id = UserId(it.id.value), name = UserName(it.name), mail = Mail(it.mail)) }
+                .let { Users(it) }
+        }
 
     override fun findBy(id: UserId): User {
-        val user =
+        val user = transaction(
+            transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED,
+            repetitionAttempts = 2
+        ) {
             UserDao.findByUserId(id.value) ?: throw UserNotFoundException(id)
+        }
         return User(UserId(user.id.value), UserName(user.name), Mail(user.mail))
     }
 
