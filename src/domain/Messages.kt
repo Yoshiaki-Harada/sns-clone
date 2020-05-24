@@ -22,27 +22,22 @@ class Messages(val list: List<Message>) {
     fun sorted(by: By, order: Order): Messages = when (by) {
         By.UPDATED_AT -> when (order) {
             Order.ASC -> list.sortedBy {
-                it.updatedAt
+                it.messageInfo.updatedAt
             }
-            Order.DESC -> list.sortedByDescending { it.updatedAt }
+            Order.DESC -> list.sortedByDescending { it.messageInfo.updatedAt }
         }
         By.CREATED_AT -> when (order) {
             Order.ASC -> list.sortedBy {
-                it.createdAt
+                it.messageInfo.createdAt
             }
-            Order.DESC -> list.sortedByDescending { it.createdAt }
+            Order.DESC -> list.sortedByDescending { it.messageInfo.createdAt }
         }
     }.let { Messages(it) }
 
     fun sortedComments(by: By, order: Order) = list.map {
         Message(
-            id = it.id,
-            text = it.text,
-            userId = it.userId,
-            comments = it.comments.sorted(by, order),
-            tags = it.tags,
-            createdAt = it.createdAt,
-            updatedAt = it.updatedAt
+            user = it.user,
+            messageInfo = it.messageInfo
         )
 
     }.let {

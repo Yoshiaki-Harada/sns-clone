@@ -15,7 +15,6 @@ import io.ktor.locations.*
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.post
-import io.ktor.routing.put
 import io.ktor.routing.routing
 import org.kodein.di.generic.instance
 import java.util.*
@@ -170,13 +169,13 @@ fun Application.messageModule() {
 
 
 fun Message.toResponse() = ResponseMessage(
-    id = id.value,
-    text = text.value,
-    userId = userId.value,
-    tags = tags.list.map { it.toResponse() },
-    createdAt = createdAt.toStr(),
-    updatedAt = updatedAt.toStr(),
-    comments = comments.list.map { it.toResponse() }
+    id = messageInfo.id.value,
+    text = messageInfo.text.value,
+    userId = user.id.value,
+    tags = messageInfo.tags.list.map { it.toResponse() },
+    createdAt = messageInfo.createdAt.toStr(),
+    updatedAt = messageInfo.updatedAt.toStr(),
+    comments = messageInfo.comments.list.map { it.toResponse() }
 )
 
 fun Comment.toResponse() = ResponseComment(

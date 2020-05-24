@@ -1,10 +1,10 @@
 package com.example.gateway
 
 import com.example.domain.*
-import com.example.driver.dao.CommentDao
-import com.example.driver.dao.MessageDao
-import com.example.driver.dao.TagDao
-import com.example.driver.dao.TagMapDao
+import com.example.domain.Comments
+import com.example.domain.Messages
+import com.example.domain.Tags
+import com.example.driver.dao.*
 import com.example.driver.entity.CommentEntity
 import com.example.driver.entity.MessageEntity
 import com.example.valueobject.CreatedComment
@@ -34,7 +34,12 @@ class MessageRepository(
                 val name = result[com.example.driver.dao.Tags.name]
                 Tag(TagId(id), TagName(name))
             }
-            it.toDomain(Comments(comment), Tags(tags))
+            val user = UserDao.findByUserId(it.userId.value) ?: throw UserNotFoundException(UserId(it.userId.value))
+            it.toDomain(
+                User(UserId(user.id.value), UserName(user.name), Mail(user.mail)),
+                Comments(comment),
+                Tags(tags)
+            )
         }.let {
             Messages(it)
         }
@@ -53,7 +58,12 @@ class MessageRepository(
                     val name = result[com.example.driver.dao.Tags.name]
                     Tag(TagId(id), TagName(name))
                 }
-                it.toDomain(Comments(comment), Tags(tags))
+                val user = UserDao.findByUserId(it.userId.value) ?: throw UserNotFoundException(UserId(it.userId.value))
+                it.toDomain(
+                    User(UserId(user.id.value), UserName(user.name), Mail(user.mail)),
+                    Comments(comment),
+                    Tags(tags)
+                )
             } ?: throw MessageNotFoundException(id)
         }
     }
@@ -69,7 +79,13 @@ class MessageRepository(
                 val name = result[com.example.driver.dao.Tags.name]
                 Tag(TagId(id), TagName(name))
             }
-            it.toDomain(Comments(comment), Tags(tags))
+
+            val user = UserDao.findByUserId(it.userId.value) ?: throw UserNotFoundException(UserId(it.userId.value))
+            it.toDomain(
+                User(UserId(user.id.value), UserName(user.name), Mail(user.mail)),
+                Comments(comment),
+                Tags(tags)
+            )
         }.let {
             Messages(it)
         }
@@ -151,15 +167,17 @@ class MessageRepository(
         }
     }
 
-    fun MessageDao.toDomain(comments: Comments, tags: Tags) =
+    fun MessageDao.toDomain(user: User, comments: Comments, tags: Tags) =
         Message(
-            id = MessageId(id.value),
-            userId = UserId(userId.value),
-            text = MessageText(text),
-            tags = tags,
-            comments = comments,
-            createdAt = createdAt.atZone(zoneId),
-            updatedAt = updatedAt.atZone(zoneId)
+            user = user,
+            messageInfo = MessageInfo(
+                id = MessageId(id.value),
+                text = MessageText(text),
+                tags = tags,
+                comments = comments,
+                createdAt = createdAt.atZone(zoneId),
+                updatedAt = createdAt.atZone(zoneId)
+            )
         )
 
     fun CommentDao.toDomain() = Comment(
