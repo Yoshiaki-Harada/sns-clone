@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>219b4ced-30f7-45ef-8f1d-d9e5317153f6.SCHEMA:sns_db.public</OriginalElement>
+  <nodes>
+    <node x="294.125" y="244.0">219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.tags</node>
+    <node x="228.5" y="455.0">219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.tag_map</node>
+    <node x="95.125" y="211.0">219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.messages</node>
+    <node x="0.0" y="422.0">219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.comments</node>
+    <node x="22.375" y="0.0">219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.users</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.messages" target="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.users">
+      <point x="0.0" y="-80.5" />
+      <point x="184.625" y="186.0" />
+      <point x="156.625" y="186.0" />
+      <point x="44.75" y="80.5" />
+    </edge>
+    <edge source="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.tag_map" target="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.messages">
+      <point x="-36.0" y="-58.5" />
+      <point x="264.5" y="397.0" />
+      <point x="229.375" y="397.0" />
+      <point x="44.75" y="80.5" />
+    </edge>
+    <edge source="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.comments" target="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.users">
+      <point x="-44.75" y="-91.5" />
+      <point x="44.75" y="397.0" />
+      <point x="61.874999999999986" y="397.0" />
+      <point x="61.874999999999986" y="186.0" />
+      <point x="67.125" y="186.0" />
+      <point x="-44.75" y="80.5" />
+    </edge>
+    <edge source="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.comments" target="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.messages">
+      <point x="44.75" y="-91.5" />
+      <point x="134.25" y="397.0" />
+      <point x="139.875" y="397.0" />
+      <point x="-44.75" y="80.5" />
+    </edge>
+    <edge source="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.tag_map" target="219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.tags">
+      <point x="36.0" y="-58.5" />
+      <point x="336.5" y="397.0" />
+      <point x="371.625" y="397.0" />
+      <point x="0.0" y="47.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="225.0" y="302.5" />
+  <SelectedNodes>
+    <node>219b4ced-30f7-45ef-8f1d-d9e5317153f6.TABLE:sns_db.public.tags</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+
