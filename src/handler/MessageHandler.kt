@@ -15,6 +15,7 @@ import io.ktor.locations.*
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.post
+import io.ktor.routing.put
 import io.ktor.routing.routing
 import org.kodein.di.generic.instance
 import java.util.*
@@ -59,8 +60,8 @@ fun Application.messageModule() {
         val messageUsecase by Injector.kodein.instance<MessageUsecase>()
 
         @Location("/messages")
-        data class MessagesLocation(val order: String = "asc", val by: String = "createdAt")
-        get<MessagesLocation> { params ->
+        data class GetMessagesLocation(val order: String = "asc", val by: String = "createdAt")
+        get<GetMessagesLocation> { params ->
             val orderBy = OrderBy.of(params.order, params.by)
             val order = orderBy.order
             val by = orderBy.by
@@ -72,12 +73,12 @@ fun Application.messageModule() {
         }
 
         @Location("/messages")
-        data class MessagesLocationByUserId(
+        data class GetMessagesLocationByUserId(
             val userId: String,
             val order: String = "asc",
             val by: String = "createdAt"
         )
-        get<MessagesLocationByUserId> { params ->
+        get<GetMessagesLocationByUserId> { params ->
             val userId = params.userId
             val orderBy = OrderBy.of(params.order, params.by)
             val order = orderBy.order
@@ -98,6 +99,30 @@ fun Application.messageModule() {
                 )
             )
             call.respond(ResponseId(id.value))
+        }
+        @Location("/messages/{messageId}")
+        data class GetMessageLocation(val messageId: String)
+        get<GetMessageLocation> { params ->
+            val messageId = params.messageId
+            val message = messageUsecase.get(MessageId(getId(messageId))).toResponse()
+            call.respond(message)
+        }
+
+        @Location("/messages/{messageId}")
+        data class PutMessageLocation(val messageId: String)
+        put<PutMessageLocation> { params ->
+            val messageId = params.messageId
+            val message = call.receive<RequestMessage>()
+            messageUsecase.updated(
+                MessageId(getId(messageId)),
+                CreatedMessage(
+                    userId = UserId(getId(message.userId)),
+                    text = MessageText(message.text),
+                    tags = CreatedTags(message.tags.map { CreatedTag(it.name) })
+                )
+            )
+            messageUsecase.get(MessageId(getId(messageId))).toResponse()
+            call.respond(JsonResponse("OK"))
         }
         @Location("/messages/{messageId}/comments")
         data class GetCommentsLocation(val messageId: String)
@@ -155,7 +180,11 @@ fun Message.toResponse() = ResponseMessage(
 )
 
 fun Comment.toResponse() = ResponseComment(
-    id = id.value, text = commentText.value, createdAt = createdAt.toStr(), updatedAt = updatedAt.toStr(), userId = userId.value
+    id = id.value,
+    text = commentText.value,
+    createdAt = createdAt.toStr(),
+    updatedAt = updatedAt.toStr(),
+    userId = userId.value
 )
 
 fun Tag.toResponse() = ResponseTag(

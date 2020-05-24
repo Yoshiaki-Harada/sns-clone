@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.gateway.MessageNotFoundException
 import com.example.gateway.UserNotFoundException
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -35,6 +36,11 @@ fun Application.module(testing: Boolean = false) {
     }
     install(StatusPages) {
         exception<UserNotFoundException> { cause ->
+            val errorMessage: String = cause.message ?: "Unknown error"
+            call.respond(HttpStatusCode.NotFound, JsonErrorResponse(errorMessage))
+        }
+
+        exception<MessageNotFoundException> { cause ->
             val errorMessage: String = cause.message ?: "Unknown error"
             call.respond(HttpStatusCode.NotFound, JsonErrorResponse(errorMessage))
         }
