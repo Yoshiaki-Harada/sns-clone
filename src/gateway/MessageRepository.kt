@@ -47,7 +47,6 @@ class MessageRepository(
         ) {
             MessageDao.findByMessageId(id.value)?.let {
                 val comment = CommentDao.findByMessageId(it.id.value).map { c -> c.toDomain() }
-
                 val tags = TagDao.findByMessageId(it.id.value).map { result ->
                     val id = result[com.example.driver.dao.Tags.id].value
                     val name = result[com.example.driver.dao.Tags.name]
