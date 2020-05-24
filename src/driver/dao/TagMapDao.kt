@@ -37,6 +37,8 @@ class TagMapDao(id: EntityID<UUID>) : UUIDEntity(id) {
             this.messageId = EntityID(messageId, Messages)
         }
 
+        fun deleteByMessageId(messageId: UUID) = findByMessageId(messageId).forEach { it.delete() }
+
         fun createIfNotExistMap(tagId: UUID, messageId: UUID) {
             if (TagMapDao.find { (TagMap.messageId eq messageId) and (TagMap.tagId eq tagId) }.count() == 0L) {
                 create(UUID.randomUUID(), tagId, messageId)
@@ -46,5 +48,4 @@ class TagMapDao(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var tagId by TagMap.tagId
     var messageId by TagMap.messageId
-    var name by TagDao referencedOn Tags.id
 }

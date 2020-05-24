@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
 import java.util.*
 
-class MessageNotFoundException(id: MessageId) : Throwable("user: ${id.value} not found")
+class MessageNotFoundException(id: MessageId) : Throwable("message: ${id.value} not found")
 
 class MessageRepository(
     val database: Database
@@ -46,6 +46,7 @@ class MessageRepository(
             repetitionAttempts = 2
         ) {
             MessageDao.findByMessageId(id.value)?.let {
+                logger.debug { "id $id" }
                 val comment = CommentDao.findByMessageId(it.id.value).map { c -> c.toDomain() }
                 val tags = TagDao.findByMessageId(it.id.value).map { result ->
                     val id = result[com.example.driver.dao.Tags.id].value
@@ -107,7 +108,7 @@ class MessageRepository(
                     text = message.text.value
                 )
             )
-
+            TagMapDao.deleteByMessageId(messageId.value)
             message.tags.list.forEach {
                 val tagId = TagDao.findOrCreate(it.name)
                 TagMapDao.createIfNotExistMap(tagId, messageId.value)
