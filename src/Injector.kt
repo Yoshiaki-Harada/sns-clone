@@ -4,10 +4,7 @@ import com.example.gateway.MessagePort
 import com.example.gateway.MessageRepository
 import com.example.gateway.UserPort
 import com.example.gateway.UserRepository
-import com.example.usecase.MessageUsecase
-import com.example.usecase.MessageUsecaseImpl
-import com.example.usecase.UserUsecase
-import com.example.usecase.UserUsecaseImpl
+import com.example.usecase.*
 import org.jetbrains.exposed.sql.Database
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
@@ -17,8 +14,17 @@ import org.postgresql.ds.PGSimpleDataSource
 
 object Injector {
     val usecaseModule = Kodein.Module("usecase") {
-        bind<MessageUsecase>() with singleton { MessageUsecaseImpl(instance(), instance()) }
-        bind<UserUsecase>() with singleton { UserUsecaseImpl(instance()) }
+        bind<MessagesGetUseCase>() with singleton { MessagesGetUseCaseImpl(instance()) }
+        bind<MessageGetUseCase>() with singleton { MessageGetUseCaseImpl(instance()) }
+        bind<MessageCreateUseCase>() with singleton { MessageCreateUseCaseImpl(instance(), instance()) }
+        bind<MessageUpdateUseCase>() with singleton { MessageUpdateUseCaseImpl(instance(), instance()) }
+        bind<CommentsGetUseCase>() with singleton { CommentsGetUseCaseImpl(instance()) }
+        bind<CommentUpdateUseCase>() with singleton { CommentUpdateUseCaseImpl(instance(), instance()) }
+        bind<CommentCreateUseCase>() with singleton { CommentCreateUseCaseImpl(instance(), instance()) }
+        bind<UserCreateUseCase>() with singleton { UserCreateUseCaseImpl(instance()) }
+        bind<UserGetUseCase>() with singleton { UserGetUseCaseImpl(instance()) }
+        bind<UsersGetUseCase>() with singleton { UsersGetUseCaseImpl(instance()) }
+        bind<UserUpdateUseCase>() with singleton { UserUpdateUseCaseImpl(instance()) }
     }
 
     val portModule = Kodein.Module("port") {

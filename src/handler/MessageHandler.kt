@@ -4,7 +4,7 @@ import com.example.Injector
 import com.example.JsonResponse
 import com.example.ResponseId
 import com.example.domain.*
-import com.example.usecase.MessageUsecase
+import com.example.usecase.*
 import com.example.valueobject.CreatedComment
 import com.example.valueobject.CreatedMessage
 import com.example.valueobject.CreatedTag
@@ -56,7 +56,13 @@ data class RequestComment(
 @KtorExperimentalLocationsAPI
 fun Application.messageModule() {
     routing {
-        val messageUsecase by Injector.kodein.instance<MessageUsecase>()
+        val messagesGetUseCase by Injector.kodein.instance<MessagesGetUseCase>()
+        val messageGetUseCase by Injector.kodein.instance<MessageGetUseCase>()
+        val messageCreateUseCase by Injector.kodein.instance<MessageCreateUseCase>()
+        val messageUpdateUseCase by Injector.kodein.instance<MessageUpdateUseCase>()
+        val commentsGetUseCase by Injector.kodein.instance<CommentsGetUseCase>()
+        val commentCreateUseCase by Injector.kodein.instance<CommentCreateUseCase>()
+        val commentUpdateUseCase by Injector.kodein.instance<CommentUpdateUseCase>()
 
         @Location("/messages")
         data class GetMessagesLocation(val order: String = "asc", val by: String = "createdAt")
@@ -65,7 +71,7 @@ fun Application.messageModule() {
             val order = orderBy.order
             val by = orderBy.by
 
-            val messages = messageUsecase.get(by, order).list.map { it.toResponse() }.let {
+            val messages = messagesGetUseCase.execute(by, order).list.map { it.toResponse() }.let {
                 ResponseMessages(it)
             }
             call.respond(messages)
@@ -83,14 +89,14 @@ fun Application.messageModule() {
             val order = orderBy.order
             val by = orderBy.by
             val messages =
-                messageUsecase.getByUerId(UserId(getId(userId)), by, order).list.map { it.toResponse() }.let {
+                messagesGetUseCase.execute(UserId(getId(userId)), by, order).list.map { it.toResponse() }.let {
                     ResponseMessages(it)
                 }
             call.respond(messages)
         }
         post("/messages") {
             val message = call.receive<RequestMessage>()
-            val id = messageUsecase.create(
+            val id = messageCreateUseCase.execute(
                 CreatedMessage(
                     userId = UserId(getId(message.userId)),
                     text = MessageText(message.text),
@@ -103,7 +109,7 @@ fun Application.messageModule() {
         data class GetMessageLocation(val messageId: String)
         get<GetMessageLocation> { params ->
             val messageId = params.messageId
-            val message = messageUsecase.get(MessageId(getId(messageId))).toResponse()
+            val message = messageGetUseCase.execute(MessageId(getId(messageId))).toResponse()
             call.respond(message)
         }
 
@@ -112,7 +118,7 @@ fun Application.messageModule() {
         put<PutMessageLocation> { params ->
             val messageId = params.messageId
             val message = call.receive<RequestMessage>()
-            messageUsecase.updated(
+            messageUpdateUseCase.execute(
                 MessageId(getId(messageId)),
                 CreatedMessage(
                     userId = UserId(getId(message.userId)),
@@ -120,14 +126,17 @@ fun Application.messageModule() {
                     tags = CreatedTags(message.tags.map { CreatedTag(it.name) })
                 )
             )
-            messageUsecase.get(MessageId(getId(messageId))).toResponse()
             call.respond(JsonResponse("OK"))
         }
         @Location("/messages/{messageId}/comments")
-        data class GetCommentsLocation(val messageId: String)
+        data class GetCommentsLocation(val messageId: String, val order: String = "asc", val by: String = "createdAt")
         get<GetCommentsLocation> { params ->
             val messageId = params.messageId
-            val messages = messageUsecase.getComments(MessageId(getId(messageId))).list.map {
+            val orderBy = OrderBy.of(params.order, params.by)
+            val order = orderBy.order
+            val by = orderBy.by
+
+            val messages = commentsGetUseCase.execute(MessageId(getId(messageId)), by, order).list.map {
                 it.toResponse()
             }.let {
                 ResponseComments(it)
@@ -139,7 +148,7 @@ fun Application.messageModule() {
         post<PostComment> { params ->
             val messageId = params.messageId
             val comment = call.receive<RequestComment>()
-            val id = messageUsecase.createComment(
+            val id = commentCreateUseCase.execute(
                 CreatedComment(
                     MessageId(getId(messageId)),
                     UserId(getId(comment.userId)),
@@ -154,7 +163,7 @@ fun Application.messageModule() {
             val messageId = params.messageId
             val commentId = params.messageId
             val comment = call.receive<RequestComment>()
-            messageUsecase.updateComment(
+            commentUpdateUseCase.execute(
                 CommentId(getId(commentId)),
                 CreatedComment(
                     MessageId(getId(messageId)),

@@ -7,7 +7,7 @@ import com.example.domain.Mail
 import com.example.domain.User
 import com.example.domain.UserId
 import com.example.domain.UserName
-import com.example.usecase.UserUsecase
+import com.example.usecase.*
 import com.example.valueobject.CreatedUser
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -31,13 +31,16 @@ data class ResponseUser(
 
 fun Application.userModule() {
     routing {
-        val userUsecase by Injector.kodein.instance<UserUsecase>()
+        val userGetUseCase by Injector.kodein.instance<UserGetUseCase>()
+        val usersGetUseCase by Injector.kodein.instance<UsersGetUseCase>()
+        val userCreateUseCase by Injector.kodein.instance<UserCreateUseCase>()
+        val userUpdateUseCase by Injector.kodein.instance<UserUpdateUseCase>()
         get("/users") {
-            call.respond(userUsecase.get().list.map(User::toResponse))
+            call.respond(usersGetUseCase.execute().list.map(User::toResponse))
         }
         post("/users") {
             val user = call.receive<RequestUser>()
-            val id = userUsecase.create(
+            val id = userCreateUseCase.execute(
                 CreatedUser(
                     name = UserName(user.name),
                     mail = Mail(user.mail)
@@ -49,13 +52,13 @@ fun Application.userModule() {
         data class GetUserLocation(val userId: String)
         get<GetUserLocation> { params ->
             val id = getId(params.userId)
-            call.respond(userUsecase.get(UserId(id)).toResponse())
+            call.respond(userGetUseCase.execute(UserId(id)).toResponse())
         }
         @Location("/users/{userId}")
         data class UpdateUserLocation(val userId: String)
         put<UpdateUserLocation> { params ->
             val user = call.receive<RequestUser>()
-            userUsecase.update(
+            userUpdateUseCase.execute(
                 UserId(getId(params.userId)),
                 CreatedUser(name = UserName(user.name), mail = Mail(user.mail))
             )
